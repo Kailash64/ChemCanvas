@@ -90,32 +90,40 @@ export default function CanvasPage() {
   const handleOnInit = (ketcherInstance: Ketcher) => {
     ketcherRef.current = ketcherInstance;
     (window as any).ketcher = ketcherInstance;
-    // Listen for both possible custom button events
-    ketcherInstance.eventBus?.addListener('CUSTOM_BUTTON_CLICK', (buttonId: string) => {
-      console.log('CUSTOM_BUTTON_CLICK event:', buttonId);
-    });
-    ketcherInstance.eventBus?.addListener('CUSTOM_BUTTON_PRESSED', async (buttonId: string) => {
-      console.log('CUSTOM_BUTTON_PRESSED event:', buttonId);
-      if (buttonId === 'new-canvas') {
-        // New Canvas logic
-        const { data } = await supabase.from('canvases').insert([{}]).select('id').single();
-        if (data?.id) {
-          window.location.href = `/canvas/${data.id}`;
-        } else {
-          setError('Failed to create a new canvas.');
-        }
-      } else if (buttonId === 'share') {
-        // Share logic
-        if (ketcherRef.current) {
-          const ket = await ketcherRef.current.getKet();
-          await supabase.from('canvases').update({ ket }).eq('id', uuid);
-          navigator.clipboard.writeText(window.location.href);
-          alert('Canvas saved and URL copied to clipboard!');
-        }
+
+    function addListeners() {
+      if (!ketcherInstance.eventBus) {
+        setTimeout(addListeners, 50);
+        return;
       }
-    });
+      ketcherInstance.eventBus.addListener('CUSTOM_BUTTON_CLICK', (buttonId: string) => {
+        console.log('CUSTOM_BUTTON_CLICK event:', buttonId);
+      });
+      ketcherInstance.eventBus.addListener('CUSTOM_BUTTON_PRESSED', async (buttonId: string) => {
+        console.log('CUSTOM_BUTTON_PRESSED event:', buttonId);
+        if (buttonId === 'new-canvas') {
+          // New Canvas logic
+          const { data } = await supabase.from('canvases').insert([{}]).select('id').single();
+          if (data?.id) {
+            window.location.href = `/canvas/${data.id}`;
+          } else {
+            setError('Failed to create a new canvas.');
+          }
+        } else if (buttonId === 'share') {
+          // Share logic
+          if (ketcherRef.current) {
+            const ket = await ketcherRef.current.getKet();
+            await supabase.from('canvases').update({ ket }).eq('id', uuid);
+            navigator.clipboard.writeText(window.location.href);
+            alert('Canvas saved and URL copied to clipboard!');
+          }
+        }
+      });
+    }
+
+    addListeners();
+
     if (initialKet !== null) {
-      // Add a small delay to ensure all internal Ketcher services are ready
       setTimeout(() => {
         ketcherInstance.setMolecule(initialKet);
       }, 100);
