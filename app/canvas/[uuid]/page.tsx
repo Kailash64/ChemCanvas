@@ -160,8 +160,8 @@ export default function CanvasPage() {
           errorHandler={(message: string) => console.error('Ketcher Error:', message)}
           onInit={handleOnInit}
           customButtons={[
-            { id: 'new-canvas', title: 'New Canvas', imageLink: '/icons/new-canvas.svg', action: 'new-canvas' },
-            { id: 'share', title: 'Share', imageLink: '/icons/share.svg', action: 'share' },
+            { id: 'new-canvas', title: 'New Canvas', imageLink: '/icons/new-canvas.svg' },
+            { id: 'share', title: 'Share', imageLink: '/icons/share.svg' },
           ]}
         />
       </div>
